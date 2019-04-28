@@ -57,8 +57,9 @@ allprojects {
     }
 }
 ```
-* 
+* `混淆与合并`
 ```
+1. 
 * 在Android Studio 中 run build ,会在app目录下生成一个class.jar库文件
 目录为:  build/intermediates/bundles/debug/ or build/intermediates/bundles/release
 * 这个class.jar 是没有混淆过的jar文件
@@ -66,6 +67,30 @@ allprojects {
 * 当我们编写好 proguard-rules.pro 这个混淆规则文件后 -> sync project with Gradle Files -> click 右侧 
 gradle -> select  项目名称/Tasks/others/makeJar
 * 有时候我们通过makeJar解决不了问题的时候，我们可以使用 windows 端 retroguard 进行混淆 ，使用 apache-ant-1.10.1 进行合并 
+```
+```
+2.混淆
+* [jar的混淆](https://www.softpedia.com/get/Programming/Other-Programming-Files/RetroGuard.shtml)
+* cd xxxPackage/混淆/retroguard
+java RetroGuard classes.jar printerlib.jar script_3_4.rgs
+```
+```
+3. apache-ant 的 install and use
+* [apache-ant install reference](https://blog.csdn.net/song_hui_xiang/article/details/14315529)
+* source ~/.bashrc : 使到 /etc/bashrc 的内容生效
+
+* 具体步骤
+1） 官网(http://ant.apache.org/bindownload.cgi)下载xxx.bin.zip格式的ant文件： apache-ant-1.10.5-bin.zip
+2) 将这个zip压缩包解压后放到 /usr/local
+3) ln -s apache-ant-1.10.5-bin ant : 做一个链接link
+4) sudo vim /etc/bashrc -> 在 content 最后 add 
+    export ANT_HOME=/usr/local/ant
+    export PATH=${PATH}:${ANT_HOME}/bin
+5) .wq!
+6) source ~/.bashrc
+7) cmd 中 输入命令 ant -version 来证明ant是否已经install successful
+8) 在desktop 中 按 windows 的操作进行一遍就可以实现合并了 【build.xml】
+   ant -buildfile /Users/admin/Desktop/Package/jar/apache-ant-1.10.5/build.xml
 ```
 
 
