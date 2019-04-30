@@ -99,3 +99,49 @@ java RetroGuard classes.jar printerlib.jar script_3_4.rgs
 * nm -D xxx.so
 ```
 
+4. `byte转int -> int的值以字符串输出`
+```
+    private String printerModel;
+
+    byte[] bs1 = new  byte[2];
+    bs1[0] = RecvData[6];
+    // java总是把byte当作有符处理；我们可以通过将其和0xff进行二进制与得到它的无符值
+    int galen1 = bs1[0] & 0xFF;
+    bs1[1] = RecvData[7];
+    int galen2 = bs1[1] & 0xFF;
+    String s11 = String.valueOf(galen1) + String.valueOf(galen2);
+    printerModel =  s11;
+```
+* byte与int转换
+```
+public static byte intToByte(int x) {
+    return (byte)x;
+}
+
+public static int byteToInt(byte b) {
+    // java总是把byte当作有符处理；我们可以通过将其和0xff进行二进制与得到它的无符值
+    return b & 0xff;
+}
+```
+* byte[] 与 int转换
+```
+public static int byteArrayToInt(byte[] b) { // int 是 32 位整数
+    return b[3] &0xFF | (b[2] & 0xFF) << 8 | (b[1] &0xFF) << 16 | (b[0] & 0xFF) << 24 ;
+}
+
+public static byte[] intToByteArray(int a) {
+    return new byte[] {
+        (byte)((a >> 24) & 0xFF,
+        (byte)((a >> 16) & 0xFF),
+        (byte)((a >> 8)  & 0xFF),
+        (byte)(a & 0xff)
+    };
+}
+```
+```
+* byte，即字节，由8位的二进制组成。在Java中，byte类型的数据是8位带符号的二进制数。
+* 在计算机中，8位带符号二进制数的取值范围是[-128, 127]，所以在Java中，byte类型的取值范围也是[-128, 127]
+* 二进制从 00000000 到01111111到10000000到 11111111 
+  即 十进制从 0 到 127 到 -128 到 -1
+```
+
