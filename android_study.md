@@ -145,3 +145,147 @@ public static byte[] intToByteArray(int a) {
   即 十进制从 0 到 127 到 -128 到 -1
 ```
 
+5. `获取外部文件路径`
+* [Android系统用于Activity的标准Intent](https://blog.csdn.net/zhangjg_blog/article/details/10901293)
+* [通过URI获取的文件路径为null的解决方法](https://blog.csdn.net/dj0379/article/details/50765021)
+```
+* Android 4.4 以后，打开外部存储的文件获取到的文件路径是经过处理的,不是真正的文件路径，需要经过处理
+```
+```
+网上实例：
+打开多个应用选取各种类型的数据,以uri返回。返回的uri可使用ContentResolver.openInputStream(Uri)打开
+    该功能可用在邮件中附件的选取
+    举例如下:
+    选取一张图片, 返回的uri为 content://media/external/images/media/47
+    选取一首歌, 返回的uri为 content://media/external/audio/media/51
+
+    		Intent intent = new Intent();
+    		intent.setAction(Intent.ACTION_GET_CONTENT);     
+    		intent.setType("*/*");
+    		intent.addCategory(Intent.CATEGORY_OPENABLE);
+    		startActivityForResult(intent, 2);
+```
+* `真实用例`
+```
+case xxx.button:
+    // 创建 Intent 对象，进行通信
+    Intent chooseIntent = new Intent(Intent.ACTION_GET_CONTENT);
+    chooseIntent.setType("*/*");    // 设置可以打开的文件类型
+    chooseIntent.addCategory(Intent.CATEGORY_OPENABLE); // 指定返回的uri可使用ContentResolver.openInputStream（Uri）打开
+    startActivityForResult(Intent.createChooser(chooseIntent,"用于图片打开")，1)；
+
+    // startActivityForResult 方法得到结果后会回调 onActivityResult 方法，进行下一步的操作
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case 0:
+                    // 获取外部存储文件的路径 ： 注意 Android 4.4 以后得到的文件路径不是真正的
+                    // 需要对获取的文件路径进行进一步操作才能获取到路径
+                    String filePath = getFilePath(this, data.getData());
+                    if (filePath == null) {
+                        ToastUtil.show(this, getString(R.string.file_open_failure));
+                        return;
+                    }
+                    System.out.println(filePath);
+                    int number = 0;
+                    byte[] buffer = new byte[0];
+                    try {
+                        // 文件缓冲流读取 - 不管传入文件的格式，这里只负责传输数据罢了，和格式无关
+                        DataInputStream dis = new DataInputStream(new FileInputStream(filePath));
+                        int length = dis.available();
+                        buffer = new byte[length];
+                        number = dis.read(buffer);
+                        dis.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    if (number > 0) {
+                        printerManager.sendData(buffer, this);
+                    } else {
+                        ToastUtil.show(this, R.string.file_read_failure);
+                        return;
+                    }
+                    break;
+
+            }
+        }
+    }
+```
+* `对获取到的文件路径进行处理，已达到获取真实文件路径的目的`
+```
+ @TargetApi(Build.VERSION_CODES.KITKAT)
+    public String getFilePath(Context context, Uri uri) {
+        final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+        if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
+            System.out.println(uri);
+            if (isExternalStorageDocument(uri)) {
+                final String docId = DocumentsContract.getDocumentId(uri);
+                final String[] split = docId.split(":");
+                final String type = split[0];
+                if ("primary".equalsIgnoreCase(type)) {
+                    return Environment.getExternalStorageDirectory() + "/" + split[1];
+                }
+            }else if (isDownloadsDocument(uri)) {// DownloadsProvider
+                final String id = DocumentsContract.getDocumentId(uri);
+                final Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"),
+                        Long.valueOf(id));
+                return getDataColumn(context, contentUri, null, null);
+            } else if (isMediaDocument(uri)) {// MediaProvider
+                final String docId = DocumentsContract.getDocumentId(uri);
+                final String[] split = docId.split(":");
+                final String type = split[0];
+                Uri contentUri = null;
+                if ("image".equals(type)) {
+                    contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                }
+                final String selection = "_id=?";
+                final String[] selectionArgs = new String[] { split[1] };
+                return getDataColumn(context, contentUri, selection, selectionArgs);
+            }
+        } else if ("content".equalsIgnoreCase(uri.getScheme())) {
+            String[] projection = {"_data"};
+            try {
+                Cursor cursor = context.getContentResolver().query(uri, projection, null, null, null);
+                int column_index = cursor.getColumnIndexOrThrow("_data");
+                if (cursor.moveToFirst()) {
+                    return cursor.getString(column_index);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            return uri.getPath();
+        }
+        return null;
+    }
+    public static String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
+        Cursor cursor = null;
+        final String column = "_data";
+        final String[] projection = { column };
+        try {
+            cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                final int column_index = cursor.getColumnIndexOrThrow(column);
+                return cursor.getString(column_index);
+            }
+        } finally {
+            if (cursor != null)
+                cursor.close();
+        }
+        return null;
+    }
+
+    public boolean isExternalStorageDocument(Uri uri) {
+        return "com.android.externalstorage.documents".equals(uri.getAuthority());
+    }
+
+    public static boolean isDownloadsDocument(Uri uri) {
+        return "com.android.providers.downloads.documents".equals(uri.getAuthority());
+    }
+
+    public static boolean isMediaDocument(Uri uri) {
+        return "com.android.providers.media.documents".equals(uri.getAuthority());
+    }
+
+```
