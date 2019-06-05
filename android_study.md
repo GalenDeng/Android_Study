@@ -289,3 +289,26 @@ case xxx.button:
     }
 
 ```
+
+6. `签名区别`
+```
+1. V1签名适用于所有的android version ; V2签名只适用于 android 7.0及以上的 version
+```
+7. `系统时间获取`
+```
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
+         
+        String year = String.valueOf(cal.get(Calendar.YEAR));
+        String month = String.valueOf(cal.get(Calendar.MONTH)+1);
+        String day = String.valueOf(cal.get(Calendar.DATE));
+        if (cal.get(Calendar.AM_PM) == 0)
+            hour = String.valueOf(cal.get(Calendar.HOUR));
+        else
+            hour = String.valueOf(cal.get(Calendar.HOUR)+12);
+        minute = String.valueOf(cal.get(Calendar.MINUTE));
+        second = String.valueOf(cal.get(Calendar.SECOND));
+         
+        String system1 = year + "-" + month + "-" + day;
+        String system2 = hour + "-" + minute + "-" + second;
+```
