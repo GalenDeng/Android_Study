@@ -1,6 +1,7 @@
 # AS中的gradle2_x和grade3_x的区别 (2019.10.12)
 
 * [gradle2.x和gradle3.x的区别](https://blog.csdn.net/yuzhiqiang_1993/article/details/78366985)
+* [升级到AndroidStudio3.2.1的注意事项](https://blog.csdn.net/m0_37292262/article/details/84844890)
 
 1. `compile / implement / api 的区别 `
 ```
