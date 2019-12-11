@@ -32,3 +32,6 @@ InputStream isBm = new ByteArrayInputStream(baos.toByteArray());
 printerManager.close();
 printerManager.sendData(PrintContent.getPicByteData(TransactionQueryListActivity.this, isBm), TransactionQueryListActivity.this);
 ```
+```
+上面的pdf转图片打印的实质是： 获取 pdf的路径 -> new File -> new PdfRenderer -> 一页一页地 open -> PdfRenderer.Page.render 把每一页的内容draw 到 bitmap -> bitmap.compress 到 ByteArrayOutputStream -> 这个流里面的数据就是每一页的内容
+```
