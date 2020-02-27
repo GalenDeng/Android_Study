@@ -5,3 +5,5 @@
 * adb shell pm list packages    // 列出installed 的应用包名
 * adb shell pm path  包名(com.jolimark.android.printservice)  // 查找相关apk的位置
 * adb pull /xxx.apk   /yyy  // 拉apk 出来
+
+* adb shell ps | grep com.jolimark.*   // 查找某个apk
