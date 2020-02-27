@@ -1,6 +1,7 @@
 # android_minSdkVersion_targetSdkVersion_compileSdkVersion_buildToolsVersion 作用 （2020.02.27）
 
 * [作用参考链接](https://cloud.tencent.com/developer/article/1338229)
+* [targetSdkVersion](https://blog.csdn.net/qq_23062979/article/details/81294550)
 * `explaination`
 ```
 转：
